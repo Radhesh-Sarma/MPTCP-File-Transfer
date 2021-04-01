@@ -10,6 +10,8 @@ class FileClient:
         self.sock.bind(self.client_address)
         self.name = self.sock.getsockname()
         print('Client has been assigned socket name', self.name)
+        print("My address is " + str(self.client_address))
+        print("Connecting to server at" + str(self.server_address))
         self.sock.connect(self.server_address)
         input_file = open(filename, 'rb')
         block_size = 32
@@ -31,7 +33,7 @@ class FileClient:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('File Transfer Client')
-    parser.add_argument('--filename', type=str, default='input.txt', help='video filename to stream')
+    parser.add_argument('--filename', type=str, default='file_sample2.mp4', help='video filename to stream')
     parser.add_argument('--server_ip', type=str, default='127.0.0.1', help='IP address of server')
     parser.add_argument('--server_port', type=int, default=5000, help='port number of server')
     parser.add_argument('--client_ip', type=str, default='127.0.0.1', help='IP address of client')

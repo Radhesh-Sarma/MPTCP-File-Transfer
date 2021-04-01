@@ -1,0 +1,67 @@
+from mininet.net import Mininet
+from mininet.cli import CLI
+from mininet.link import Link, TCLink,Intf
+from subprocess import Popen, PIPE
+from mininet.log import setLogLevel
+from mininet.util import dumpNodeConnections
+
+if '__main__' == __name__:
+  setLogLevel('info')
+  net = Mininet(link=TCLink)
+  key = "net.mptcp.mptcp_enabled"
+  value = 1
+  p = Popen("sysctl -w %s=%s" % (key, value), shell=True, stdout=PIPE, stderr=PIPE)
+  stdout, stderr = p.communicate()
+  print ("stdout=",stdout,"stderr=", stderr)
+  radhesh = net.addHost('radhesh')
+  simran = net.addHost('simran')
+  pranjal = net.addHost('pranjal')
+  linkopt={'bw':1000}
+  net.addLink(pranjal,radhesh,cls=TCLink, **linkopt)
+  net.addLink(pranjal,radhesh,cls=TCLink, **linkopt)
+  net.addLink(pranjal,simran,cls=TCLink, **linkopt)
+  net.addLink(pranjal,simran,cls=TCLink, **linkopt)
+  net.addLink(radhesh,simran,cls=TCLink, **linkopt)
+  net.addLink(simran ,radhesh,cls=TCLink, **linkopt)
+  net.build()
+  pranjal.cmd("ifconfig pranjal-eth0 0")
+  pranjal.cmd("ifconfig pranjal-eth1 0")
+  pranjal.cmd("ifconfig pranjal-eth2 0")
+  pranjal.cmd("ifconfig pranjal-eth3 0")
+  radhesh.cmd("ifconfig radhesh-eth0 0")
+  radhesh.cmd("ifconfig radhesh-eth1 0")
+  simran.cmd("ifconfig simran-eth0 0")
+  simran.cmd("ifconfig simran-eth1 0")
+  pranjal.cmd("echo 1 > /proc/sys/net/ipv4/ip_forward")
+  pranjal.cmd("ifconfig pranjal-eth0 10.0.0.1 netmask 255.255.255.0")
+  pranjal.cmd("ifconfig pranjal-eth1 10.0.1.1 netmask 255.255.255.0")
+  pranjal.cmd("ifconfig pranjal-eth2 10.0.2.1 netmask 255.255.255.0")
+  pranjal.cmd("ifconfig pranjal-eth3 10.0.3.1 netmask 255.255.255.0")
+  radhesh.cmd("ifconfig radhesh-eth0 10.0.0.2 netmask 255.255.255.0")
+  radhesh.cmd("ifconfig radhesh-eth1 10.0.1.2 netmask 255.255.255.0")
+  simran.cmd("ifconfig simran-eth0 10.0.2.2 netmask 255.255.255.0")
+  simran.cmd("ifconfig simran-eth1 10.0.3.2 netmask 255.255.255.0")
+  radhesh.cmd("ip rule add from 10.0.0.2 table 1")
+  radhesh.cmd("ip rule add from 10.0.1.2 table 2")
+  radhesh.cmd("ip route add 10.0.0.0/24 dev radhesh-eth0 scope link table 1")
+  radhesh.cmd("ip route add default via 10.0.0.1 dev radhesh-eth0 table 1")
+  radhesh.cmd("ip route add 10.0.1.0/24 dev radhesh-eth1 scope link table 2")
+  radhesh.cmd("ip route add default via 10.0.1.1 dev radhesh-eth1 table 2")
+  radhesh.cmd("ip route add default scope global nexthop via 10.0.0.1 dev radhesh-eth0")
+  simran.cmd("ip rule add from 10.0.2.2 table 1")
+  simran.cmd("ip rule add from 10.0.3.2 table 2")
+  simran.cmd("ip route add 10.0.2.0/24 dev simran-eth0 scope link table 1")
+  simran.cmd("ip route add default via 10.0.2.1 dev simran-eth0 table 1")
+  simran.cmd("ip route add 10.0.3.0/24 dev simran-eth1 scope link table 2")
+  simran.cmd("ip route add default via 10.0.3.1 dev simran-eth1 table 2")
+  simran.cmd("ip route add default scope global nexthop via 10.0.2.1 dev simran-eth0")
+
+  CLI(net)
+  net.start()
+  dumpNodeConnections(net.hosts)
+  print(net.hosts)
+  print("Testing Network Connectivity")
+  net.pingAll()
+  print("Testing bandwidth")
+  net.iperf((pranjal,simran))
+  net.stop()
