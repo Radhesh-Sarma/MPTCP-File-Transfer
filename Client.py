@@ -1,5 +1,6 @@
 import socket,argparse
 from util import Util
+import time
 class FileClient:
     def __init__(self,client_address,server_address,filename):
         self.client_address = client_address
@@ -16,10 +17,11 @@ class FileClient:
         input_file = open(filename, 'rb')
         block_size = 32
         snd_bytes = 0
+        start = time.time()
         while True:
             piece = input_file.read(block_size)
             snd_bytes += block_size
-            print('\r  %d bytes send' % (snd_bytes,), )
+            # print('\r  %d bytes send' % (snd_bytes,), )
             if piece == b'':
                 piece = b'bye$'
                 self.sock.sendall(piece)
@@ -28,12 +30,14 @@ class FileClient:
             self.sock.sendall(piece)
         input_file.close()
         message = Util.recvall(self.sock, b'$')
-        print (message)
+        # print (message)
+        end = time.time()
+        print(str(end - start) + " seconds")
         self.sock.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('File Transfer Client')
-    parser.add_argument('--filename', type=str, default='file_sample2.mp4', help='video filename to stream')
+    parser.add_argument('--filename', type=str, default='file_sample1.mp4', help='video filename to stream')
     parser.add_argument('--server_ip', type=str, default='127.0.0.1', help='IP address of server')
     parser.add_argument('--server_port', type=int, default=5000, help='port number of server')
     parser.add_argument('--client_ip', type=str, default='127.0.0.1', help='IP address of client')
