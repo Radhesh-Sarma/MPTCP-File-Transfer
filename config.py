@@ -36,5 +36,4 @@ if '__main__' == __name__:
   print("Testing bandwidth")
   net.iperf((laptop2,laptop1))
   CLI(net)
-  # laptop1.cmd("python3 Server.py")
   net.stop()
