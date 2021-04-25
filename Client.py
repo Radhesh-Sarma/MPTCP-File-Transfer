@@ -38,9 +38,9 @@ class FileClient:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('File Transfer Client')
     parser.add_argument('--filename', type=str, default='file_sample1.mp4', help='video filename to stream')
-    parser.add_argument('--server_ip', type=str, default='127.0.0.1', help='IP address of server')
+    parser.add_argument('--server_ip', type=str, default='10.0.0.1', help='IP address of server')
     parser.add_argument('--server_port', type=int, default=5000, help='port number of server')
-    parser.add_argument('--client_ip', type=str, default='127.0.0.1', help='IP address of client')
+    parser.add_argument('--client_ip', type=str, default='10.0.0.2', help='IP address of client')
     parser.add_argument('--client_port', type=int, default=8000, help='port number of client')
     args = parser.parse_args()
     file_client = FileClient(client_address=(args.client_ip,args.client_port),server_address=(args.server_ip,args.server_port),filename=f'{args.filename}')

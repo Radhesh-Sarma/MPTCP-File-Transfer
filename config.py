@@ -33,7 +33,5 @@ if '__main__' == __name__:
   print(net.hosts)
   print("Testing Network Connectivity")
   net.pingAll()
-  print("Testing bandwidth")
-  net.iperf((laptop2,laptop1))
   CLI(net)
   net.stop()
